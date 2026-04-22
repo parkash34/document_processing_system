@@ -32,6 +32,7 @@ Restaurant owners can update documents without changing any code.
 | python-dotenv | Environment variable management |
 
 ## Project Structure
+```
 document-processing/
 │
 ├── env/
@@ -40,29 +41,41 @@ document-processing/
 ├── faq.txt
 ├── .env
 └── requirements.txt
+```
 
 ## Setup
 
 1. Clone the repository
+```
 git clone https://github.com/yourusername/bella-italia-document-processing
-
+```
 2. Create and activate virtual environment
+```
 python -m venv env
 env\Scripts\activate
+```
 
 3. Install dependencies
+```
 pip install -r requirements.txt
+```
 
 4. Create `.env` file and add your API keys
+```
 API_KEY=your_groq_api_key
 PINECONE_API_KEY=your_pinecone_api_key
+```
 
 5. Add your documents to project folder
+```
 menu.pdf  →  restaurant menu PDF
 faq.txt   →  frequently asked questions text file
+```
 
 6. Run the server
+```
 uvicorn main:app --reload
+```
 
 ## API Endpoints
 
@@ -118,6 +131,7 @@ No request body needed.
 ```
 
 ## How It Works
+```
 menu.pdf + faq.txt
 ↓
 PyPDFLoader and TextLoader load files
@@ -138,9 +152,10 @@ Pinecone finds similar chunks across all documents
 Chunks sent to AI with source information
 ↓
 AI generates accurate answer from real documents
+```
 
 ## Updating Documents
-
+```
 When restaurant owner updates the menu:
 
 Replace menu.pdf with new file
@@ -150,7 +165,7 @@ AI uses updated information immediately
 
 
 No code changes needed — this is how the SaaS business works.
-
+```
 ## Document Pipeline
 
 ```python
@@ -164,7 +179,7 @@ add_documents()    →  embeds and stores in Pinecone
 ```
 
 ## Metadata Tracking
-
+```
 Each chunk stored with source information:
 PDF chunks:
 source: "menu.pdf"
@@ -172,10 +187,13 @@ page: 0
 TXT chunks:
 source: "faq.txt"
 page: N/A
+```
 
 ## Environment Variables
+```
 API_KEY=your_groq_api_key
 PINECONE_API_KEY=your_pinecone_api_key
+```
 
 ## Notes
 
