@@ -49,6 +49,30 @@ if "bella-italia-docs" not in pc.list_indexes().names():
         )
     )
 
+def build_restaurant_pipeline():
+    all_documents = []
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=50
+    )
+    
+    menu_loader = PyPDFLoader("menu.pdf")
+    menu_docs = menu_loader.load()
+    print(f"Menu pages loaded: {len(menu_docs)}")
+    menu_chunks = splitter.split_documents(menu_docs)
+    all_documents.extend(menu_chunks)
+
+
+    faq_loader = TextLoader("faq.txt")
+    faq_docs = faq_loader.load()
+    print(f"FAQ documents loaded: {len(faq_docs)}")
+    faq_chunks = splitter.split_documents(faq_docs)
+
+    all_documents.extend(faq_chunks)
+    print(f"Total chunks: {len(all_documents)}")
+
+    return all_documents
 
 
 vector_store = PineconeVectorStore(
@@ -56,6 +80,16 @@ vector_store = PineconeVectorStore(
     embedding=embeddings,
     pinecone_api_key=pinecone_api_key
 )
+
+index = pc.Index("bella-italia-docs")
+stats = index.describe_index_stats()
+
+if stats.total_vector_count == 0:
+    chunks = build_restaurant_pipeline()
+    vector_store.add_documents(chunks)
+    print("Documents loaded successfully")
+else:
+    print("Documents already loaded - skipping")
 
 llm = ChatGroq(
     model = "llama-3.3-70b-versatile",
