@@ -1,0 +1,65 @@
+import os
+from pydantic import BaseModel, field_validator
+from fastapi import FastAPI
+from dotenv import load_dotenv
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_pinecone import PineconeVectorStore
+from pinecone import Pinecone, ServerlessSpec
+from langchain_groq import ChatGroq
+from langchain_core.messages import HumanMessage, AIMessage
+
+
+load_dotenv()
+api_key = os.getenv("API_KEY")
+if not api_key:
+    raise ValueError("API KEY is missing in .env file")
+
+pinecone_api_key = os.getenv("PINECONE_API_KEY")
+if not pinecone_api_key:
+    raise ValueError("PINECONE API KEY is missing in .env file")
+
+app = FastAPI()
+
+class Query(BaseModel):
+    query: str
+
+    @field_validator("query")
+    @classmethod
+    def query_is_empty(cls, v):
+        if not v.strip():
+            raise ValueError("Query is Empty")
+        return v
+
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
+
+pc = Pinecone(api_key=pinecone_api_key)
+
+if "bella-italia-docs" not in pc.list_indexes().names():
+    pc.create_index(
+        name="bella-italia-docs",
+        dimension=384,
+        metric="cosine",
+        spec=ServerlessSpec(
+            cloud="aws",
+            region="us-east-1"
+        )
+    )
+
+
+
+vector_store = PineconeVectorStore(
+    index_name="bella-italia-docs",
+    embedding=embeddings,
+    pinecone_api_key=pinecone_api_key
+)
+
+llm = ChatGroq(
+    model = "llama-3.3-70b-versatile",
+    temperature = 0.2,
+    max_tokens = 500,
+    api_key = api_key
+)
