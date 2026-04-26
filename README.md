@@ -201,7 +201,7 @@ PINECONE_API_KEY=your_pinecone_api_key
 - Documents embedded once — skipped on subsequent restarts
 - Call /update endpoint after changing any document
 - System searches across all documents simultaneously
-- HuggingFace model downloads automatically on first 
+- HuggingFace model downloads automatically on first run
 - Pinecone free tier — 1 index, 2GB storage, no credit card
 
 ## 👤 Author
